@@ -1,11 +1,23 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-
+const cors = require("cors");
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 
 const app = express();
+
+// app.use(cors());
+app.use(function (req, res, next) {
+  console.log("inside headers");
+  console.log(res.header);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 app.use(index);
 
@@ -20,7 +32,7 @@ io.on("connection", (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  interval = setInterval(() => getApiAndEmit(socket, 1000));
+  interval = setInterval(() => getApiAndEmit(socket, 5000));
   socket.on("disconnected", () => {
     console.log("client Disconnected");
     clearInterval(interval);
@@ -28,9 +40,10 @@ io.on("connection", (socket) => {
 });
 
 const getApiAndEmit = (socket) => {
-  const resonse = new Date();
+  const response = new Date();
+  // console.log(socket);
 
-  socket.emit("FromApi", response);
+  socket.emit("FromAPI", response);
 };
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
